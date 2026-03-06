@@ -29,6 +29,7 @@ common warnings
     -Wpartial-type-signatures -Wredundant-constraints
 
   default-extensions:
+    BangPatterns
     DataKinds
     DerivingStrategies
     DerivingVia
