@@ -529,7 +529,7 @@ or wrap with your own locking mechanism.
 -}
 runTransactionUnguarded
     :: forall m t cf op b
-     . (GCompare t, MonadFail m, MonadIO m)
+     . (GCompare t, MonadFail m)
     => Database m cf t op
     -- ^ Database to run against
     -> Transaction m cf t op b
@@ -554,7 +554,7 @@ without side effects.
 -}
 runSpeculation
     :: forall m t cf op b
-     . (GCompare t, MonadFail m, MonadIO m)
+     . (GCompare t, MonadFail m)
     => Database m cf t op
     -- ^ Database to run against
     -> Transaction m cf t op b
