@@ -71,6 +71,8 @@ module Database.KV.Transaction
     , RunTransaction (..)
     , newRunTransaction
     , runTransactionUnguarded
+    , runTransactionDirect
+    , runTransactionCollectOps
     , runSpeculation
 
       -- * Composable Primitives
@@ -529,6 +531,53 @@ runTransactionUnguarded db@Database{columns, applyOps} tx =
         ops <- workspaceToOps db columns workspaces
         applyOps ops
         pure result
+
+{- |
+Run a transaction directly against the live database, without
+creating a snapshot. Reads see the current state, writes are
+applied atomically at commit.
+
+Use this when snapshot isolation is not needed (e.g., when
+the caller guarantees no concurrent writes to the same keys).
+Avoids snapshot creation\/destruction overhead.
+-}
+runTransactionDirect
+    :: forall m t cf op b
+     . (GCompare t, MonadFail m)
+    => Database m cf t op
+    -- ^ Database to run against (live, no snapshot)
+    -> Transaction m cf t op b
+    -- ^ Transaction to execute
+    -> m b
+runTransactionDirect db@Database{columns, applyOps} tx = do
+    (result, workspaces) <-
+        executeTransaction db columns tx
+    ops <- workspaceToOps db columns workspaces
+    applyOps ops
+    pure result
+
+{- |
+Execute a transaction and return the result together with
+the list of write operations, without applying them.
+Reads from the live database (no snapshot).
+
+The caller is responsible for applying the ops via
+'applyOps'. This enables batching ops from multiple
+concurrent transactions into a single write.
+-}
+runTransactionCollectOps
+    :: forall m t cf op b
+     . (GCompare t, MonadFail m)
+    => Database m cf t op
+    -- ^ Database to run against
+    -> Transaction m cf t op b
+    -- ^ Transaction to execute
+    -> m (b, [op])
+runTransactionCollectOps db@Database{columns} tx = do
+    (result, workspaces) <-
+        executeTransaction db columns tx
+    ops <- workspaceToOps db columns workspaces
+    pure (result, ops)
 
 {- |
 Run a transaction speculatively without concurrency control.
