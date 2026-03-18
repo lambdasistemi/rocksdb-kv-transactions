@@ -73,6 +73,11 @@ module Database.KV.Transaction
     , runTransactionUnguarded
     , runSpeculation
 
+      -- * Composable Primitives
+    , Workspaces
+    , executeTransaction
+    , workspaceToOps
+
       -- * Utilities
     , fromPairList
 
