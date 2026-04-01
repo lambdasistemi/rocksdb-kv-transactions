@@ -59,6 +59,7 @@ library kv-transactions
   exposed-modules:
     Database.KV.Cursor
     Database.KV.Database
+    Database.KV.InMemory
     Database.KV.Query
     Database.KV.Transaction
 
@@ -95,14 +96,20 @@ test-suite unit-tests
   main-is:            Main.hs
   other-modules:
     Database.KV.CursorSpec
+    Database.KV.EquivalenceSpec
     Database.KV.QuerySpec
+    Database.KV.TestDatabase
     Database.KV.TransactionSpec
 
   build-depends:
     , base                                     >=4.14 && <5
     , bytestring                               >=0.10 && <0.13
+    , containers                               >=0.6  && <0.8
     , data-default                             >=0.7  && <0.8
+    , dependent-map                            >=0.4  && <0.5
+    , dependent-sum                            >=0.7  && <0.8
     , hspec                                    >=2.10 && <2.12
+    , QuickCheck                               >=2.14 && <2.16
     , rocksdb-haskell-jprupp                   >=2.1  && <2.2
     , rocksdb-kv-transactions
     , rocksdb-kv-transactions:kv-transactions
